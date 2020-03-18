@@ -482,7 +482,7 @@ curl_close($ch);
             </div>
             <div class="as-search-results as-filter-open as-category-landing as-desktop" id="as-search-results">
 
-                <div id="accessories-tab" class="as-accessories-details">
+                <div id="accessories-tab" class="as-accessories-details" style="padding: 40px;">
                     <div class="as-accessories" id="as-accessories">
                         <div class="as-accessories-header">
                             <div class="as-search-results-count">
@@ -529,9 +529,8 @@ curl_close($ch);
                                     echo 'Se ha realizado un contracargo en su tarjeta de crédito.';
                                     break;
                             }
-                            
                             ?></p>
-                            <?php if($payment_response->status){ ?>
+                            <?php if($payment_response->status == 'approved'){ ?>
                             <p><strong>Estado:</strong> <?php echo $payment_response->status; ?></p>
                             <p><strong>Método de pago:</strong> <?php echo $payment_response->payment_method_id; ?></p>
                             <p><strong>Monto:</strong> $<?php echo $payment_response->transaction_amount; ?></p>
