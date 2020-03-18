@@ -1,4 +1,13 @@
-<?php require('checkout.php'); ?>
+<?php
+// Get payment info
+$ch = curl_init("https://api.mercadopago.com/v1/payments/" . $_POST['payment_id'] . "?access_token=APP_USR-6317427424180639-090914-5c508e1b02a34fcce879a999574cf5c9-469485398");
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+$payment_response = json_decode(curl_exec($ch));
+curl_close($ch);
+?>
 <!DOCTYPE html>
 <html class="supports-animation supports-columns svg no-touch no-ie no-oldie no-ios supports-backdrop-filter as-mouseuser" lang="en-US">
 
@@ -451,12 +460,9 @@
     </style>
 </head>
 
-
-
 <body class="as-theme-light-heroimage">
 
     <div class="stack">
-
         <div class="as-search-wrapper" role="main">
             <div class="as-navtuck-wrapper">
                 <div class="as-l-fullwidth  as-navtuck" data-events="event52">
@@ -486,75 +492,62 @@
                         <div class="as-searchnav-placeholder" style="height: 77px;">
                             <div class="row as-search-navbar" id="as-search-navbar" style="width: auto;">
                                 <div class="as-accessories-filter-tile column large-6 small-3">
-
-                                    <button class="as-filter-button" aria-expanded="true" aria-controls="as-search-filters" type="button">
-                                        <h2 class=" as-filter-button-text">
-                                            Smartphones
-                                        </h2>
-                                    </button>
-
-
+                                    <h2 class=" as-filter-button-text">
+                                        <?php echo $payment_response->status == 'approved' ? '¡Listo!' : 'Revise los detalles de su pago'; ?>
+                                    </h2>
                                 </div>
-
                             </div>
                         </div>
-                        <div class="as-accessories-results  as-search-desktop">
-                            <div class="width:60%">
-                                <div class="as-producttile-tilehero with-paddlenav " style="float:left;">
-                                    <div class="as-dummy-container as-dummy-img">
-
-                                        <img src="./assets/wireless-headphones" class="ir ir item-image as-producttile-image  " style="max-width: 70%;max-height: 70%;" alt="" width="445" height="445">
-                                    </div>
-                                    <div class="images mini-gallery gal5 ">
-
-
-                                        <div class="as-isdesktop with-paddlenav with-paddlenav-onhover">
-                                            <div class="clearfix image-list xs-no-js as-util-relatedlink relatedlink" data-relatedlink="6|Powerbeats3 Wireless Earphones - Neighborhood Collection - Brick Red|MPXP2">
-                                                <div class="as-tilegallery-element as-image-selected">
-                                                    <div class=""></div>
-                                                    <img src="./assets/003.jpg" class="ir ir item-image as-producttile-image" alt="" width="445" height="445" style="content:-webkit-image-set(url(<?php echo $_POST['img'] ?>) 2x);">
-                                                </div>
-
-                                            </div>
-
-
-                                        </div>
-
-
-
-                                    </div>
-
-                                </div>
-                                <div class="as-producttile-info" style="float:left;min-height: 168px;">
-                                    <div class="as-producttile-titlepricewraper" style="min-height: 128px;">
-                                        <div class="as-producttile-title">
-                                            <h3 class="as-producttile-name">
-                                                <p class="as-producttile-tilelink">
-                                                    <span data-ase-truncate="2"><?php echo $_POST['title'] ?></span>
-                                                </p>
-
-                                            </h3>
-                                        </div>
-                                        <h3>
-                                            $ <?php echo $_POST['price'] ?>
-                                        </h3>
-                                        <h3>
-                                            <?php echo $_POST['unit'] . " unidad" ?>
-                                        </h3>
-                                    </div>
-                                    <form action="/procesar-pago.php" method="POST" style="margin-top: 15px;">
-                                        <script src="https://www.mercadopago.com.ar/integrations/v1/web-payment-checkout.js" data-button-label="Pagar la compra" data-elements-color="#2D3277" data-header-color="#2D3277" data-preference-id="<?php echo $preference->id; ?>">
-                                        </script>
-                                    </form>
-                                </div>
-                            </div>
+                        <div class="as-accessories-results">
+                            <p style="margin-top: 15px;"><?php
+                            switch ($payment_response->status) {
+                                case 'pending':
+                                    echo 'Su pago está en estado pendiente. Por favor, complete el proceso para finalizar.';
+                                    break;
+                                case 'approved':
+                                    echo 'Su pago ha sido realizado con éxito. A continuación los datos del mismo:';
+                                    break;
+                                case 'authorized':
+                                    echo 'Su pago fue autorizado pero no ha sido concretado aún.';
+                                    break;
+                                case 'in_process':
+                                    echo 'Su pago está en revisión.';
+                                    break;
+                                case 'in_mediation':
+                                    echo 'Existe una disputa iniciada.';
+                                    break;
+                                case 'rejected':
+                                    echo 'Su pago ha sido rechazado. Intente nuevamente.';
+                                    break;
+                                case 'cancelled':
+                                    echo 'Su pago está cancelado.';
+                                    break;
+                                case 'refunded':
+                                    echo 'El pago fue devuelto.';
+                                    break;
+                                case 'charged_back':
+                                    echo 'Se ha realizado un contracargo en su tarjeta de crédito.';
+                                    break;
+                            }
+                            
+                            ?></p>
+                            <?php if($payment_response->status){ ?>
+                            <p><strong>Estado:</strong> <?php echo $payment_response->status; ?></p>
+                            <p><strong>Método de pago:</strong> <?php echo $payment_response->payment_method_id; ?></p>
+                            <p><strong>Monto:</strong> $<?php echo $payment_response->transaction_amount; ?></p>
+                            <p><strong>Número de Orden:</strong> <?php echo $payment_response->external_reference; ?></p>
+                            <p><strong>Id de Mercado Pago:</strong> <?php echo $payment_response->id; ?></p>
+                            <?php } ?>
+                        </div>
+                        <div style="margin-top: 40px;">
+                            <a href="https://maurohmartinez-mp-commerce-php.herokuapp.com">Volver a la página inicial</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div role="alert" class="as-loader-text ally" aria-live="assertive"></div>
-        <div class="as-footnotes">
+        <div class="as-footnotes" style="margin-top: 50px;">
             <div class="as-footnotes-content">
                 <div class="as-footnotes-sosumi">
                     Todos los derechos reservados Tienda Tecno 2019
