@@ -502,7 +502,7 @@ curl_close($ch);
                             <p style="margin-top: 15px;"><?php
                             switch ($payment_response->status) {
                                 case 'pending':
-                                    echo 'Su pago está en estado pendiente. Por favor, complete el proceso para finalizar.';
+                                    echo 'Su pago está en estado pendiente. Por favor, siga los pasos enviados a su email para finalizar.';
                                     break;
                                 case 'approved':
                                     echo 'Su pago ha sido realizado con éxito. A continuación los datos del mismo:';
