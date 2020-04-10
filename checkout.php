@@ -57,7 +57,7 @@ $preference->external_reference = 'ABCD1234';
 $preference->auto_return = "approved";
 
 // Notification
-$preference->notification_url = "https://maurohmartinez-mp-commerce-php.herokuapp.com/ipn";
+$preference->notification_url = "https://maurohmartinez-mp-commerce-php.herokuapp.com/webhook.php";
 
 // Medios de pago
 $preference->payment_methods = array(
